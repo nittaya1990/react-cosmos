@@ -26,6 +26,12 @@
       "type": "string",
       "minLength": 1
     },
+    "plugins": {
+      "description": "Module names of Cosmos plugins (eg. react-cosmos-plugin-open-fixture).",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
     "publicUrl": {
       "description": "Base URL for static assets. [default: \"/\"]",
       "type": "string"
@@ -151,6 +157,10 @@
         },
         "hotReload": {
           "description": "Enable webpack's Hot Module Replacement. [default: true]",
+          "type": "boolean"
+        },
+        "reloadOnFail": {
+          "description": "When using webpack's Hot Module Replacement, enable automatic location reload after webpack fails to update modules. [default: true]",
           "type": "boolean"
         }
       }

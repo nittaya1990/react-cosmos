@@ -1,14 +1,17 @@
-import fs from 'fs';
-import path from 'path';
-import open from 'open';
 import launchEditor from '@skidding/launch-editor';
 import express from 'express';
-import { CosmosConfig } from '../config/shared';
-import { DevServerPluginArgs } from '../shared/devServer';
+import fs from 'fs';
+import open from 'open';
+import path from 'path';
+import { DevServerPluginArgs } from 'react-cosmos-plugin';
+import { CosmosConfig } from 'react-cosmos-shared2/cosmosConfig';
 
 type ReqQuery = { filePath: void | string; line: number; column: number };
 
-export function openFile({ cosmosConfig, expressApp }: DevServerPluginArgs) {
+export default function openFileDevServerPlugin({
+  cosmosConfig,
+  expressApp,
+}: DevServerPluginArgs) {
   expressApp.get('/_open', (req: express.Request, res: express.Response) => {
     const { filePath, line, column } = getReqQuery(req);
     if (!filePath) {

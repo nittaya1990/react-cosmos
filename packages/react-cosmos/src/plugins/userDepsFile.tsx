@@ -2,21 +2,21 @@ import { FSWatcher, watch } from 'chokidar';
 import { writeFile } from 'fs';
 import { debounce } from 'lodash';
 import path from 'path';
+import { DevServerPluginArgs } from 'react-cosmos-plugin';
+import { CosmosConfig } from 'react-cosmos-shared2/cosmosConfig';
 import promisify from 'util.promisify';
-import { CosmosConfig } from '../config';
 import { getCliArgs } from '../shared/cli';
-import { DevServerPluginArgs } from '../shared/devServer';
 import { NativeRendererConfig } from '../shared/rendererConfig';
+import { generateUserDepsModule } from '../userDeps/generateUserDepsModule';
 import {
-  generateUserDepsModule,
   getDecoratorPatterns,
   getFixturePatterns,
   getIgnorePatterns,
-} from '../shared/userDeps';
+} from '../userDeps/shared';
 
 const writeFileAsync = promisify(writeFile);
 
-export async function userDepsFile(args: DevServerPluginArgs) {
+export async function userDepsFileDevServerPlugin(args: DevServerPluginArgs) {
   if (!shouldGenerateUserDepsFile(args)) return;
 
   const { cosmosConfig } = args;

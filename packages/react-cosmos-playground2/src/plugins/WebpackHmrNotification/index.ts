@@ -1,9 +1,11 @@
-import { createPlugin, PluginContext } from 'react-plugin';
+import {
+  NotificationsSpec,
+  RendererCoreSpec,
+  WebpackHmrNotificationSpec,
+} from 'react-cosmos-shared2/ui';
 import { Message } from 'react-cosmos-shared2/util';
 import { WebpackRendererResponse } from 'react-cosmos-shared2/webpack';
-import { RendererCoreSpec } from '../RendererCore/public';
-import { NotificationsSpec } from '../Notifications/public';
-import { WebpackHmrNotificationSpec } from './public';
+import { createPlugin, PluginContext } from 'react-plugin';
 
 type WebpackHmrNotificationContext = PluginContext<WebpackHmrNotificationSpec>;
 
@@ -35,8 +37,7 @@ function onRendererResponse(
         id: 'renderer-hmr-fail',
         type: 'error',
         title: 'Hot reload failed',
-        info:
-          'Check the browser console to see which module failed to hot reload.',
+        info: 'Check the browser console to see which module failed to hot reload.',
       });
 
     default:

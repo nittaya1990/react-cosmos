@@ -1,12 +1,12 @@
 import { waitFor } from '@testing-library/dom';
-import { loadPlugins, resetPlugins } from 'react-plugin';
 import {
   getRendererCoreMethods,
-  mockRouter,
-  mockNotifications,
   getRouterContext,
+  mockNotifications,
+  mockRouter,
   onRendererCore,
-} from '../../../testHelpers/pluginMocks';
+} from 'react-cosmos-shared2/ui';
+import { loadPlugins, resetPlugins } from 'react-plugin';
 import { mockRendererReady } from '../testHelpers';
 
 beforeEach(() => jest.isolateModules(() => require('..')));
@@ -30,10 +30,7 @@ function loadTestPlugins() {
 }
 
 function emitRouterFixtureChange() {
-  getRouterContext().emit('fixtureChange', {
-    path: 'zwei.js',
-    name: null,
-  });
+  getRouterContext().emit('fixtureChange', { path: 'zwei.js' });
 }
 
 it('posts "selectFixture" renderer requests', async () => {
@@ -48,7 +45,7 @@ it('posts "selectFixture" renderer requests', async () => {
       type: 'selectFixture',
       payload: {
         rendererId: 'mockRendererId1',
-        fixtureId: { path: 'zwei.js', name: null },
+        fixtureId: { path: 'zwei.js' },
         fixtureState: {},
       },
     })
@@ -59,7 +56,7 @@ it('posts "selectFixture" renderer requests', async () => {
       type: 'selectFixture',
       payload: {
         rendererId: 'mockRendererId2',
-        fixtureId: { path: 'zwei.js', name: null },
+        fixtureId: { path: 'zwei.js' },
         fixtureState: {},
       },
     })

@@ -19,7 +19,7 @@ yarn add --dev react-cosmos
 
 > Please see [Compilation](#compilation) to make sure you installed all necessary dependencies.
 
-2\. **Create package.json scripts**
+2\. **Add package.json scripts**
 
 ```diff
 "scripts": {
@@ -605,14 +605,6 @@ This is a `.babelrc` example for Next.js:
 
 - Run `cosmos` with the `--external-userdeps` flag. This should generate `cosmos.userdeps.js`. Check that file to see if your fixtures are being picked up by Cosmos.
 - Check your directory structure. If you are using a Cosmos config file, Cosmos will use the directory of the config file as the root of your project. If your Cosmos config file is nested in a directory that isn't an ancestor of your fixture files, Cosmos will not find your fixtures. To solve this add a [`rootDir`](https://github.com/react-cosmos/react-cosmos/blob/d800a31b39d82c810f37a2ad0d25eed5308b830a/packages/react-cosmos/config.schema.json#L10-L14) entry to your Cosmos config pointing to your root directory.
-
-#### "Error: Already listening" when using Create React App 4+ webpack config
-
-- This is a [known issue](https://github.com/react-cosmos/react-cosmos/issues/1272) when using the CRA 4.0.0+ webpack config. Fast Refresh support for Cosmos is being investigated.
-- Until Fast Refresh is supported here is a workaround that allows you to use the CRA webpack config:
-  1. `npm install --save-dev cross-env` or `yarn add --dev cross-env`.
-  1. In your `package.json` change the `cosmos` npm script to: `cross-env FAST_REFRESH=false cosmos`.
-  1. Run `npm run cosmos` or `yarn cosmos` as usual.
 
 ## Where's my old Cosmos?
 

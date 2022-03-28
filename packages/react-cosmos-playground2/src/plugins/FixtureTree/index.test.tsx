@@ -1,19 +1,24 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { loadPlugins, resetPlugins } from 'react-plugin';
-import { NavRowSlot } from '../../shared/slots/NavRowSlot';
+import { FixtureList } from 'react-cosmos-shared2/renderer';
 import {
   mockCore,
   mockRendererCore,
   mockRouter,
   mockStorage,
-} from '../../testHelpers/pluginMocks';
+  NavRowSlot,
+} from 'react-cosmos-shared2/ui';
+import { loadPlugins, resetPlugins } from 'react-plugin';
 
 beforeEach(() => jest.isolateModules(() => require('.')));
 
 afterEach(resetPlugins);
 
-const fixtures = { 'ein.js': null, 'zwei.js': null, 'drei.js': null };
+const fixtures: FixtureList = {
+  'ein.js': { type: 'single' },
+  'zwei.js': { type: 'single' },
+  'drei.js': { type: 'single' },
+};
 
 function registerTestPlugins() {
   mockStorage();
@@ -61,10 +66,7 @@ it('sends fixtureId to router on fixture click', async () => {
   const { getByText } = await loadTestPlugins();
   fireEvent.click(getByText(/zwei/i));
 
-  expect(selectFixture).toBeCalledWith(expect.any(Object), {
-    path: 'zwei.js',
-    name: null,
-  });
+  expect(selectFixture).toBeCalledWith(expect.any(Object), { path: 'zwei.js' });
 });
 
 it('renders blank state', async () => {

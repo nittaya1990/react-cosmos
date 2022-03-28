@@ -1,7 +1,7 @@
 import { waitFor } from '@testing-library/dom';
+import { getRouterMethods } from 'react-cosmos-shared2/ui';
 import { loadPlugins, resetPlugins } from 'react-plugin';
 import { pushUrlParams, resetUrl } from '../../../testHelpers/url';
-import { getRouterMethods } from '../../../testHelpers/pluginMocks';
 
 beforeEach(() => jest.isolateModules(() => require('..')));
 
@@ -10,7 +10,7 @@ afterEach(() => {
   resetUrl();
 });
 
-const fixtureId = { path: 'zwei.js', name: null };
+const fixtureId = { path: 'zwei.js' };
 
 it('returns fixtureId', async () => {
   pushUrlParams({ fixtureId: JSON.stringify(fixtureId) });

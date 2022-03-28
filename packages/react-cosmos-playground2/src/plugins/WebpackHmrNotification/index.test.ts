@@ -1,10 +1,10 @@
 import { waitFor } from '@testing-library/dom';
-import { loadPlugins, resetPlugins } from 'react-plugin';
 import {
-  mockNotifications,
   getRendererCoreContext,
+  mockNotifications,
   mockRendererCore,
-} from '../../testHelpers/pluginMocks';
+} from 'react-cosmos-shared2/ui';
+import { loadPlugins, resetPlugins } from 'react-plugin';
 
 beforeEach(() => jest.isolateModules(() => require('.')));
 
@@ -31,8 +31,7 @@ it('notifies HMR fail', async () => {
       id: 'renderer-hmr-fail',
       type: 'error',
       title: 'Hot reload failed',
-      info:
-        'Check the browser console to see which module failed to hot reload.',
+      info: 'Check the browser console to see which module failed to hot reload.',
     })
   );
 });

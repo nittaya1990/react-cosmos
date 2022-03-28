@@ -9,12 +9,9 @@ import {
 } from './shared';
 
 // __getMockApi is defined in mockSocketIo.js
-const {
-  WS_URL,
-  getMessages,
-  postMessage,
-  resetMessages,
-} = (io as any).__getMockApi();
+const { WS_URL, getMessages, postMessage, resetMessages } = (
+  io as any
+).__getMockApi();
 
 export async function mountWebSockets(
   args: FixtureLoaderTestArgs,
@@ -37,22 +34,13 @@ export async function mountWebSockets(
   }
 }
 
-function getElement({
-  rendererId,
-  fixtures,
-  selectedFixtureId = null,
-  decorators = {},
-  onErrorReset,
-}: FixtureLoaderTestArgs) {
+function getElement({ decorators = {}, ...otherArgs }: FixtureLoaderTestArgs) {
   return (
     <FixtureLoader
-      rendererId={rendererId}
+      {...otherArgs}
       rendererConnect={createWebSocketsConnect(WS_URL)}
-      fixtures={fixtures}
-      selectedFixtureId={selectedFixtureId}
       systemDecorators={[]}
       userDecorators={decorators}
-      onErrorReset={onErrorReset}
     />
   );
 }

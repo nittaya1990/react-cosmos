@@ -1,18 +1,19 @@
 import { waitFor } from '@testing-library/dom';
-import { loadPlugins, resetPlugins } from 'react-plugin';
+import { FixtureList } from 'react-cosmos-shared2/renderer';
 import {
   getRendererCoreMethods,
-  mockRouter,
   mockNotifications,
-} from '../../../../testHelpers/pluginMocks';
-import { mockRendererReady, mockFixtureStateChange } from '../../testHelpers';
+  mockRouter,
+} from 'react-cosmos-shared2/ui';
+import { loadPlugins, resetPlugins } from 'react-plugin';
+import { mockFixtureStateChange, mockRendererReady } from '../../testHelpers';
 
 beforeEach(() => jest.isolateModules(() => require('../..')));
 
 afterEach(resetPlugins);
 
-const fixtures = { 'ein.js': null };
-const fixtureId = { path: 'zwei.js', name: null };
+const fixtures: FixtureList = { 'ein.js': { type: 'single' } };
+const fixtureId = { path: 'zwei.js' };
 const fixtureState = { props: [] };
 
 function registerTestPlugins() {

@@ -1,17 +1,18 @@
 import {
+  FixtureId,
   RendererId,
   RendererReadyResponse,
 } from 'react-cosmos-shared2/renderer';
-import { NotificationsSpec } from '../../Notifications/public';
+import { NotificationsSpec, RouterSpec } from 'react-cosmos-shared2/ui';
+import { RendererCoreContext, State } from '../shared';
 import { postSelectFixtureRequest } from '../shared/postRequest';
 import { getSelectedFixtureId } from '../shared/router';
-import { RendererCoreContext, State } from '../shared';
 
 export function receiveRendererReadyResponse(
   context: RendererCoreContext,
   { payload }: RendererReadyResponse
 ) {
-  const { rendererId, fixtures } = payload;
+  const { rendererId, fixtures, initialFixtureId } = payload;
   context.setState(stateUpdater, afterStateChanged);
 
   function stateUpdater(prevState: State) {
@@ -30,9 +31,18 @@ export function receiveRendererReadyResponse(
   }
 
   function afterStateChanged() {
-    selectFixtureFromUrlParams(context, rendererId);
+    if (initialFixtureId) selectInitialFixture(context, initialFixtureId);
+    else selectFixtureFromUrlParams(context, rendererId);
     notifyRendererConnection(context, rendererId);
   }
+}
+
+function selectInitialFixture(
+  { getMethodsOf }: RendererCoreContext,
+  fixtureId: FixtureId
+) {
+  const router = getMethodsOf<RouterSpec>('router');
+  router.selectFixture(fixtureId);
 }
 
 function selectFixtureFromUrlParams(

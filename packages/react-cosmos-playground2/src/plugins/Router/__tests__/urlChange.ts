@@ -1,10 +1,10 @@
+import { onRouter } from 'react-cosmos-shared2/ui';
 import { loadPlugins, resetPlugins } from 'react-plugin';
 import {
-  pushUrlParams,
   popUrlParams,
+  pushUrlParams,
   resetUrl,
 } from '../../../testHelpers/url';
-import { onRouter } from '../../../testHelpers/pluginMocks';
 
 beforeEach(() => jest.isolateModules(() => require('..')));
 
@@ -13,7 +13,7 @@ afterEach(() => {
   resetUrl();
 });
 
-const fixtureId = { path: 'zwei.js', name: null };
+const fixtureId = { path: 'zwei.js' };
 
 it('emits "fixtureChange" event on "fixtureId" URL param change', () => {
   const { fixtureChange } = onRouter();

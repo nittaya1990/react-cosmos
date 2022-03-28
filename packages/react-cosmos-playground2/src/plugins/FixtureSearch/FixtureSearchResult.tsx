@@ -1,13 +1,13 @@
 import React from 'react';
 import { FlatFixtureTreeItem } from 'react-cosmos-shared2/fixtureTree';
 import { FixtureId } from 'react-cosmos-shared2/renderer';
-import styled from 'styled-components';
 import {
   blue,
   createGreyColor,
   grey64,
   selectedColors,
-} from '../../shared/colors';
+} from 'react-cosmos-shared2/ui';
+import styled from 'styled-components';
 
 type Props = {
   active: boolean;
@@ -25,10 +25,10 @@ export function FixtureSearchResult({
   const { fixtureId, fileName, name, parents } = fixtureItem;
 
   const containerRef = useScrollToActive(cleanFixturePath, active);
-  const onClick = React.useCallback(() => onSelect(fixtureId, true), [
-    fixtureId,
-    onSelect,
-  ]);
+  const onClick = React.useCallback(
+    () => onSelect(fixtureId, true),
+    [fixtureId, onSelect]
+  );
 
   return (
     <Container ref={containerRef} selected={active} onClick={onClick}>

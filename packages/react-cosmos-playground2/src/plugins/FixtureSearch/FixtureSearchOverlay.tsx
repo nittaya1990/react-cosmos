@@ -12,8 +12,7 @@ import {
   FlatFixtureTreeItem,
   flattenFixtureTree,
 } from 'react-cosmos-shared2/fixtureTree';
-import { FixtureId, FixtureNamesByPath } from 'react-cosmos-shared2/renderer';
-import styled from 'styled-components';
+import { FixtureId, FixtureList } from 'react-cosmos-shared2/renderer';
 import {
   black60,
   grey128,
@@ -23,8 +22,11 @@ import {
   grey224,
   grey248,
   grey64,
-} from '../../shared/colors';
-import { HelpCircleIcon, SearchIcon } from '../../shared/icons';
+  HelpCircleIcon,
+  quick,
+  SearchIcon,
+} from 'react-cosmos-shared2/ui';
+import styled from 'styled-components';
 import {
   KEY_DOWN,
   KEY_ENTER,
@@ -33,7 +35,6 @@ import {
   KEY_TAB,
   KEY_UP,
 } from '../../shared/keys';
-import { quick } from '../../shared/vars';
 import { FixtureSearchResult } from './FixtureSearchResult';
 import { FixtureSearchShortcuts } from './FixtureSearchShortcuts';
 
@@ -41,7 +42,7 @@ type Props = {
   searchText: string;
   fixturesDir: string;
   fixtureFileSuffix: string;
-  fixtures: FixtureNamesByPath;
+  fixtures: FixtureList;
   selectedFixtureId: null | FixtureId;
   onSetSearchText: (searchText: string) => unknown;
   onClose: () => unknown;

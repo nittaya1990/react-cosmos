@@ -2,17 +2,19 @@ import { isEqual } from 'lodash';
 import React from 'react';
 import { FlatFixtureTreeItem } from 'react-cosmos-shared2/fixtureTree';
 import { FixtureId } from 'react-cosmos-shared2/renderer';
-import styled from 'styled-components';
-import { IconButton32 } from '../../shared/buttons';
-import { grey176, grey32, white10 } from '../../shared/colors';
 import {
+  FixtureActionSlot,
+  grey176,
+  grey32,
+  IconButton32,
   MenuIcon,
+  RendererActionSlot,
   RotateCcwIcon,
   SlidersIcon,
+  white10,
   XCircleIcon,
-} from '../../shared/icons';
-import { FixtureActionSlot } from '../../shared/slots/FixtureActionSlot';
-import { RendererActionSlot } from '../../shared/slots/RendererActionSlot';
+} from 'react-cosmos-shared2/ui';
+import styled from 'styled-components';
 
 type Props = {
   fixtureItems: FlatFixtureTreeItem[];
@@ -41,10 +43,10 @@ export const RendererHeader = React.memo(function RendererHeader({
 }: Props) {
   const fixtureItem = findFixtureItemById(fixtureItems, fixtureId);
   const slotProps = React.useMemo(() => ({ fixtureId }), [fixtureId]);
-  const onReload = React.useCallback(() => onFixtureSelect(fixtureId), [
-    fixtureId,
-    onFixtureSelect,
-  ]);
+  const onReload = React.useCallback(
+    () => onFixtureSelect(fixtureId),
+    [fixtureId, onFixtureSelect]
+  );
 
   return (
     <Container>

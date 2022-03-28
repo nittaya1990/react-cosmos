@@ -1,11 +1,12 @@
 import { waitFor } from '@testing-library/dom';
-import { loadPlugins, resetPlugins } from 'react-plugin';
+import { FixtureList } from 'react-cosmos-shared2/renderer';
 import {
-  mockRouter,
-  mockNotifications,
   getRendererCoreMethods,
+  mockNotifications,
+  mockRouter,
   onRendererCore,
-} from '../../../testHelpers/pluginMocks';
+} from 'react-cosmos-shared2/ui';
+import { loadPlugins, resetPlugins } from 'react-plugin';
 import { createRendererReadyResponse } from '../testHelpers';
 
 beforeEach(() => jest.isolateModules(() => require('..')));
@@ -13,7 +14,11 @@ beforeEach(() => jest.isolateModules(() => require('..')));
 afterEach(resetPlugins);
 
 const rendererId = 'mockRendererId1';
-const fixtures = { 'ein.js': null, 'zwei.js': null, 'drei.js': null };
+const fixtures: FixtureList = {
+  'ein.js': { type: 'single' },
+  'zwei.js': { type: 'single' },
+  'drei.js': { type: 'single' },
+};
 const rendererReadyMsg = createRendererReadyResponse(rendererId, fixtures);
 
 function registerTestPlugins() {

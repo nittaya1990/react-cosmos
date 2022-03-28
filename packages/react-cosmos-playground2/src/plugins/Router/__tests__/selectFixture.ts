@@ -1,6 +1,6 @@
 import { waitFor } from '@testing-library/dom';
+import { getRouterMethods, onRouter } from 'react-cosmos-shared2/ui';
 import { loadPlugins, resetPlugins } from 'react-plugin';
-import { getRouterMethods, onRouter } from '../../../testHelpers/pluginMocks';
 import { getUrlParams, resetUrl } from '../../../testHelpers/url';
 
 beforeEach(() => jest.isolateModules(() => require('..')));
@@ -10,7 +10,7 @@ afterEach(() => {
   resetUrl();
 });
 
-const fixtureId = { path: 'zwei.js', name: null };
+const fixtureId = { path: 'zwei.js' };
 
 it('updates selected fixture ID', async () => {
   loadPlugins();

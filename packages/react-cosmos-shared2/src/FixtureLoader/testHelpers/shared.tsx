@@ -1,7 +1,7 @@
 import until from 'async-until';
 import { ReactTestRenderer } from 'react-test-renderer';
 import { FixtureState } from '../../fixtureState';
-import { ReactDecoratorsByPath, ReactFixtureExportsByPath } from '../../react';
+import { ReactDecorators, ReactFixtureWrappers } from '../../react';
 import {
   FixtureId,
   FixtureListUpdateResponse,
@@ -21,9 +21,10 @@ type GetMessages = () => Message[];
 
 export type FixtureLoaderTestArgs = {
   rendererId: RendererId;
-  fixtures: ReactFixtureExportsByPath;
+  fixtures: ReactFixtureWrappers;
   selectedFixtureId?: null | FixtureId;
-  decorators?: ReactDecoratorsByPath;
+  initialFixtureId?: FixtureId;
+  decorators?: ReactDecorators;
   onErrorReset?: () => unknown;
 };
 
@@ -82,85 +83,49 @@ export function createRendererConnectMockApi(
     });
   }
 
-  async function selectFixture({
-    rendererId,
-    fixtureId,
-    fixtureState,
-  }: SelectFixtureRequest['payload']) {
+  async function selectFixture(payload: SelectFixtureRequest['payload']) {
     return postMessage({
       type: 'selectFixture',
-      payload: {
-        rendererId,
-        fixtureId,
-        fixtureState,
-      },
+      payload,
     });
   }
 
-  async function unselectFixture({
-    rendererId,
-  }: UnselectFixtureRequest['payload']) {
+  async function unselectFixture(payload: UnselectFixtureRequest['payload']) {
     return postMessage({
       type: 'unselectFixture',
-      payload: {
-        rendererId,
-      },
+      payload,
     });
   }
 
-  async function setFixtureState({
-    rendererId,
-    fixtureId,
-    fixtureState,
-  }: SetFixtureStateRequest['payload']) {
+  async function setFixtureState(payload: SetFixtureStateRequest['payload']) {
     return postMessage({
       type: 'setFixtureState',
-      payload: {
-        rendererId,
-        fixtureId,
-        fixtureState,
-      },
+      payload,
     });
   }
 
-  async function rendererReady({
-    rendererId,
-    fixtures,
-  }: RendererReadyResponse['payload']) {
+  async function rendererReady(payload: RendererReadyResponse['payload']) {
     await untilMessage({
       type: 'rendererReady',
-      payload: {
-        rendererId,
-        fixtures,
-      },
+      payload,
     });
   }
 
-  async function fixtureListUpdate({
-    rendererId,
-    fixtures,
-  }: FixtureListUpdateResponse['payload']) {
+  async function fixtureListUpdate(
+    payload: FixtureListUpdateResponse['payload']
+  ) {
     await untilMessage({
       type: 'fixtureListUpdate',
-      payload: {
-        rendererId,
-        fixtures,
-      },
+      payload,
     });
   }
 
-  async function fixtureStateChange({
-    rendererId,
-    fixtureId,
-    fixtureState,
-  }: FixtureStateChangeResponse['payload']) {
+  async function fixtureStateChange(
+    payload: FixtureStateChangeResponse['payload']
+  ) {
     await untilMessage({
       type: 'fixtureStateChange',
-      payload: {
-        rendererId,
-        fixtureId,
-        fixtureState,
-      },
+      payload,
     });
   }
 

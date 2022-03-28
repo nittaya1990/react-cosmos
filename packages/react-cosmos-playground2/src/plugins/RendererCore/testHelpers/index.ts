@@ -1,30 +1,32 @@
+import { FixtureState } from 'react-cosmos-shared2/fixtureState';
 import {
-  FixtureNamesByPath,
   FixtureId,
-  RendererId,
-  RendererReadyResponse,
+  FixtureList,
   FixtureListUpdateResponse,
   FixtureStateChangeResponse,
+  RendererId,
+  RendererReadyResponse,
 } from 'react-cosmos-shared2/renderer';
-import { FixtureState } from 'react-cosmos-shared2/fixtureState';
-import { getRendererCoreMethods } from '../../../testHelpers/pluginMocks';
+import { getRendererCoreMethods } from 'react-cosmos-shared2/ui';
 
 export function createRendererReadyResponse(
   rendererId: RendererId,
-  fixtures: FixtureNamesByPath
+  fixtures: FixtureList,
+  initialFixtureId?: FixtureId
 ): RendererReadyResponse {
   return {
     type: 'rendererReady',
     payload: {
       rendererId,
       fixtures,
+      initialFixtureId,
     },
   };
 }
 
 export function createFixtureListUpdateResponse(
   rendererId: RendererId,
-  fixtures: FixtureNamesByPath
+  fixtures: FixtureList
 ): FixtureListUpdateResponse {
   return {
     type: 'fixtureListUpdate',
@@ -52,10 +54,11 @@ export function createFixtureStateChangeResponse(
 
 export function mockRendererReady(
   rendererId: RendererId,
-  fixtures: FixtureNamesByPath
+  fixtures: FixtureList,
+  initialFixtureId?: FixtureId
 ) {
   return getRendererCoreMethods().receiveResponse(
-    createRendererReadyResponse(rendererId, fixtures)
+    createRendererReadyResponse(rendererId, fixtures, initialFixtureId)
   );
 }
 

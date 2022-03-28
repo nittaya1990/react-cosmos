@@ -1,15 +1,14 @@
 import { isEqual } from 'lodash';
-import React from 'react';
+import React, { Component } from 'react';
 import { FixtureState, SetFixtureState } from '../fixtureState';
 import {
-  getFixtureNamesByPath,
+  getFixtureListFromWrappers,
   ReactDecorator,
-  ReactDecoratorsByPath,
-  ReactFixtureExportsByPath,
+  ReactDecorators,
+  ReactFixtureWrappers,
 } from '../react';
 import {
   FixtureId,
-  FixtureNamesByPath,
   RendererConnect,
   RendererRequest,
   RendererResponse,
@@ -19,43 +18,52 @@ import {
 import { getFixture } from './fixtureHelpers';
 import { FixtureProvider } from './FixtureProvider';
 
+// TODO: Split into FixtureLoader and FixtureLoaderConnect
 export type Props = {
   rendererId: string;
   rendererConnect: RendererConnect;
-  fixtures: ReactFixtureExportsByPath;
-  selectedFixtureId: null | FixtureId;
+  fixtures: ReactFixtureWrappers;
+  initialFixtureId?: FixtureId;
+  selectedFixtureId?: null | FixtureId;
   systemDecorators: ReactDecorator[];
-  userDecorators: ReactDecoratorsByPath;
+  userDecorators: ReactDecorators;
   renderMessage?: (args: { msg: string }) => React.ReactNode;
   onErrorReset?: () => unknown;
 };
 
+type SelectedFixture = {
+  fixtureId: FixtureId;
+  fixtureState: FixtureState;
+  // Why is this copy of the fixtureState needed? Two reasons:
+  // - To avoid posting fixtureStateChange messages with no changes from
+  //   the last message
+  // - To piggy back on React's setState batching and only send a
+  //   fixtureStateChange message when FixtureLoader updates (via cDU),
+  //   instead of posting messages in rapid succession as fixture state
+  //   changes are dispatched by fixture plugins
+  syncedFixtureState: FixtureState;
+};
+
 type State = {
-  selectedFixture: null | {
-    fixtureId: FixtureId;
-    fixtureState: FixtureState;
-    // Why is this copy of the fixtureState needed? Two reasons:
-    // - To avoid posting fixtureStateChange messages with no changes from
-    //   the last message
-    // - To piggy back on React's setState batching and only send a
-    //   fixtureStateChange message when FixtureLoader updates (via cDU),
-    //   instead of posting messages in rapid succession as fixture state
-    //   changes are dispatched by fixture plugins
-    syncedFixtureState: FixtureState;
-  };
+  selectedFixture: null | SelectedFixture;
   // Used to reset FixtureProvider instance on fixturePath change
   renderKey: number;
 };
 
-export class FixtureLoader extends React.Component<Props, State> {
+function getSelectedFixtureState(fixtureId?: FixtureId | null) {
+  if (!fixtureId) return null;
+  return {
+    fixtureId: fixtureId,
+    fixtureState: {},
+    syncedFixtureState: {},
+  };
+}
+
+export class FixtureLoader extends Component<Props, State> {
   state: State = {
-    selectedFixture: this.props.selectedFixtureId
-      ? {
-          fixtureId: this.props.selectedFixtureId,
-          fixtureState: {},
-          syncedFixtureState: {},
-        }
-      : null,
+    selectedFixture: getSelectedFixtureState(
+      this.props.selectedFixtureId || this.props.initialFixtureId
+    ),
     renderKey: 0,
   };
 
@@ -103,14 +111,16 @@ export class FixtureLoader extends React.Component<Props, State> {
 
     const { fixtures } = this.props;
     const { fixtureId, fixtureState } = selectedFixture;
+
     // Falsy check doesn't do because fixtures can be any Node, including
     // null or undefined.
     if (!fixtures.hasOwnProperty(fixtureId.path)) {
       return this.renderMessage(`Fixture path not found: ${fixtureId.path}`);
     }
 
-    const fixtureExport = fixtures[fixtureId.path];
+    const fixtureExport = fixtures[fixtureId.path].module.default;
     const fixture = getFixture(fixtureExport, fixtureId.name);
+
     if (typeof fixture === 'undefined') {
       return this.renderMessage(
         `Invalid fixture ID: ${JSON.stringify(fixtureId)}`
@@ -199,13 +209,13 @@ export class FixtureLoader extends React.Component<Props, State> {
   }
 
   postReadyState() {
-    const { rendererId } = this.props;
+    const { rendererId, initialFixtureId } = this.props;
+    const fixtures = this.getFixtureList();
     this.postMessage({
       type: 'rendererReady',
-      payload: {
-        rendererId,
-        fixtures: this.getFixtureNamesByPath(),
-      },
+      payload: initialFixtureId
+        ? { rendererId, fixtures, initialFixtureId }
+        : { rendererId, fixtures },
     });
   }
 
@@ -215,7 +225,7 @@ export class FixtureLoader extends React.Component<Props, State> {
       type: 'fixtureListUpdate',
       payload: {
         rendererId,
-        fixtures: this.getFixtureNamesByPath(),
+        fixtures: this.getFixtureList(),
       },
     });
   }
@@ -263,8 +273,8 @@ export class FixtureLoader extends React.Component<Props, State> {
     });
   };
 
-  getFixtureNamesByPath(): FixtureNamesByPath {
-    return getFixtureNamesByPath(this.props.fixtures);
+  getFixtureList() {
+    return getFixtureListFromWrappers(this.props.fixtures);
   }
 
   fireChangeCallback() {
