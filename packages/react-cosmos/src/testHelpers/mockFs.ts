@@ -1,70 +1,119 @@
-import path from 'path';
-import { CosmosConfig } from '../config';
-// @ts-ignore
-import { __mockFile, __mockDir, __unmockFs } from '../shared/fs';
-import { getCwdPath } from './cwd';
+import path from 'node:path';
+import { vi } from 'vitest';
+import { CosmosConfig } from '../cosmosConfig/types.js';
+import { getCwdPath } from './cwd.js';
 
-jest.mock('../shared/fs', () => {
-  let fileMocks: { [path: string]: any } = {};
+type ActualApi = typeof import('../utils/fs');
+
+type MockApi = ActualApi & {
+  __mockFile: (filePath: string, fileMock: {}) => void;
+  __mockJson: (filePath: string, jsonMock: {}) => void;
+  __mockDir: (dirPath: string) => void;
+  __resetMock: () => void;
+};
+
+vi.mock('../utils/fs', async () => {
+  const actual = (await vi.importActual('../utils/fs')) as ActualApi;
+  let mocked = false;
+
+  let fileMocks: { [path: string]: {} } = {};
   let dirMocks: string[] = [];
 
-  function requireModule(filePath: string) {
-    return fileMocks[filePath] || fileMocks[`${filePath}.js`];
+  async function importModule(moduleId: string) {
+    if (!mocked) return actual.importModule(moduleId);
+
+    if (
+      !fileMocks.hasOwnProperty(moduleId) &&
+      !fileMocks.hasOwnProperty(`${moduleId}.js`)
+    ) {
+      throw new Error(`Cannot find module '${moduleId}'`);
+    }
+
+    return fileMocks[moduleId] || fileMocks[`${moduleId}.js`];
   }
 
-  function moduleExists(filePath: string) {
+  async function importJson(filePath: string) {
+    if (!mocked) return actual.importJson(filePath);
+
+    if (!fileMocks.hasOwnProperty(filePath)) {
+      throw new Error(`Cannot find JSON '${filePath}'`);
+    }
+
+    return fileMocks[filePath];
+  }
+
+  function moduleExists(moduleId: string) {
+    if (!mocked) return actual.moduleExists(moduleId);
+
     return (
-      fileMocks.hasOwnProperty(filePath) ||
-      fileMocks.hasOwnProperty(`${filePath}.js`)
+      fileMocks.hasOwnProperty(moduleId) ||
+      fileMocks.hasOwnProperty(`${moduleId}.js`)
     );
   }
 
   function fileExists(filePath: string) {
+    if (!mocked) return actual.fileExists(filePath);
+
     return fileMocks.hasOwnProperty(filePath);
   }
 
   function dirExists(dirPath: string) {
+    if (!mocked) return actual.dirExists(dirPath);
+
     return dirMocks.indexOf(dirPath) !== -1;
   }
 
   return {
-    requireModule,
+    importModule,
+    importJson,
     moduleExists,
     fileExists,
     dirExists,
 
-    __mockFile(filePath: string, fileMock: any) {
+    __mockFile(filePath: string, fileMock: {}) {
+      mocked = true;
       fileMocks = { ...fileMocks, [filePath]: fileMock };
     },
 
+    __mockJson(filePath: string, jsonMock: {}) {
+      mocked = true;
+      fileMocks = { ...fileMocks, [filePath]: jsonMock };
+    },
+
     __mockDir(dirPath: string) {
+      mocked = true;
       dirMocks = [...dirMocks, dirPath];
     },
 
-    __unmockFs() {
+    __resetMock() {
       fileMocks = {};
       dirMocks = [];
     },
   };
 });
 
-export function mockCosmosConfig(
+export async function mockFile(filePath: string, fileMock: {}) {
+  (await importMocked()).__mockFile(filePath, fileMock);
+  (await importMocked()).__mockDir(path.dirname(filePath));
+}
+
+export async function mockCosmosConfig(
   cosmosConfigPath: string,
   cosmosConfig: Partial<CosmosConfig>
 ) {
-  mockFile(cosmosConfigPath, cosmosConfig);
+  const absPath = getCwdPath(cosmosConfigPath);
+  await mockFile(absPath, cosmosConfig);
 }
 
-export function mockFile(filePath: string, fileContent: {}) {
+export async function mockCwdModuleDefault(filePath: string, fileMock: {}) {
   const absPath = getCwdPath(filePath);
-  __mockFile(absPath, fileContent);
-  __mockDir(path.dirname(absPath));
+  await mockFile(absPath, { default: fileMock });
 }
 
-export function mockDir(dirPath: string) {
-  __mockDir(getCwdPath(dirPath));
+export async function resetFsMock() {
+  (await importMocked()).__resetMock();
 }
 
-export function unmockFs() {
-  __unmockFs();
+async function importMocked() {
+  return import('../utils/fs.js') as Promise<MockApi>;
 }

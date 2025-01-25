@@ -1,6 +1,0 @@
-{
-  "exportPath": "dist/live-demo",
-  "globalImports": ["src/polyfills.ts", "src/global.css"],
-  "publicUrl": "./",
-  "staticPath": "static"
-}

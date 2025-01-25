@@ -1,19 +1,20 @@
 import fs from 'fs';
-import pkgUp from 'pkg-up';
+import { readFile } from 'fs/promises';
+import path from 'path';
 import {
-  PlaygroundConfig,
-  PlaygroundMountArgs,
-} from 'react-cosmos-playground2';
-import { CosmosPluginConfig } from 'react-cosmos-plugin';
-import url from 'url';
-import { CosmosConfig } from '../config';
-import { PlatformType, replaceKeys } from './shared';
-import { getStaticPath } from './static';
+  CosmosPluginConfig,
+  pickRendererUrl,
+  replaceKeys,
+} from 'react-cosmos-core';
+import { PlaygroundMountArgs } from 'react-cosmos-ui';
+import { CosmosConfig } from '../cosmosConfig/types.js';
+import { CosmosPlatform } from '../cosmosPlugin/types.js';
+import { findUp } from '../utils/findUp.js';
+import { getServerFixtureList } from './serverFixtureList.js';
+import { getStaticPath } from './staticPath.js';
 
-export const RENDERER_FILENAME = '_renderer.html';
-
-export function getDevPlaygroundHtml(
-  platformType: PlatformType,
+export async function getDevPlaygroundHtml(
+  platform: CosmosPlatform,
   cosmosConfig: CosmosConfig,
   pluginConfigs: CosmosPluginConfig[]
 ) {
@@ -21,13 +22,20 @@ export function getDevPlaygroundHtml(
   return getPlaygroundHtml({
     playgroundConfig: {
       ...ui,
-      core: getDevCoreConfig(platformType, cosmosConfig),
+      core: await getCoreConfig(cosmosConfig, true),
+      rendererCore: {
+        fixtures: await getServerFixtureList(cosmosConfig),
+        rendererUrl:
+          platform === 'web'
+            ? pickRendererUrl(cosmosConfig.rendererUrl, 'dev')
+            : null,
+      },
     },
     pluginConfigs,
   });
 }
 
-export function getExportPlaygroundHtml(
+export async function getExportPlaygroundHtml(
   cosmosConfig: CosmosConfig,
   pluginConfigs: CosmosPluginConfig[]
 ) {
@@ -35,64 +43,40 @@ export function getExportPlaygroundHtml(
   return getPlaygroundHtml({
     playgroundConfig: {
       ...ui,
-      core: getExportCoreConfig(cosmosConfig),
+      core: await getCoreConfig(cosmosConfig, false),
+      rendererCore: {
+        fixtures: await getServerFixtureList(cosmosConfig),
+        rendererUrl: pickRendererUrl(cosmosConfig.rendererUrl, 'export'),
+      },
     },
     pluginConfigs,
   });
 }
 
-function getDevCoreConfig(
-  platformType: PlatformType,
-  cosmosConfig: CosmosConfig
-): PlaygroundConfig['core'] {
-  switch (platformType) {
-    case 'native':
-      return {
-        ...getSharedCoreConfig(cosmosConfig),
-        devServerOn: true,
-        webRendererUrl: null,
-      };
-    case 'web':
-      return {
-        ...getSharedCoreConfig(cosmosConfig),
-        devServerOn: true,
-        webRendererUrl: getWebRendererUrl(cosmosConfig),
-      };
-    default:
-      throw new Error(`Invalid platform type: ${platformType}`);
-  }
-}
-
-function getExportCoreConfig(
-  cosmosConfig: CosmosConfig
-): PlaygroundConfig['core'] {
+async function getCoreConfig(cosmosConfig: CosmosConfig, devServerOn: boolean) {
+  const { rootDir, fixturesDir, fixtureFileSuffix } = cosmosConfig;
   return {
-    ...getSharedCoreConfig(cosmosConfig),
-    devServerOn: false,
-    webRendererUrl: getWebRendererUrl(cosmosConfig),
+    projectId: await getProjectId(rootDir),
+    fixturesDir,
+    fixtureFileSuffix,
+    devServerOn,
   };
 }
 
-function getSharedCoreConfig(cosmosConfig: CosmosConfig) {
-  const { rootDir, fixturesDir, fixtureFileSuffix } = cosmosConfig;
-  return { projectId: getProjectId(rootDir), fixturesDir, fixtureFileSuffix };
-}
-
-function getProjectId(rootDir: string) {
-  const pkgPath = pkgUp.sync({ cwd: rootDir });
+async function getProjectId(rootDir: string) {
+  const pkgPath = await findUp('package.json', rootDir);
   if (!pkgPath) {
-    return rootDir.split('/').pop();
+    return rootDir.split(path.sep).pop();
   }
 
-  const pkg = require(pkgPath);
-  return pkg.name || '';
-}
-
-function getWebRendererUrl({
-  publicUrl,
-  experimentalRendererUrl,
-}: CosmosConfig) {
-  return experimentalRendererUrl || url.resolve(publicUrl, RENDERER_FILENAME);
+  try {
+    const pkg = JSON.parse(await readFile(pkgPath, 'utf8'));
+    return pkg.name || 'new-project';
+  } catch (err) {
+    console.log('Failed to read package.json');
+    console.log(err);
+    return 'new-project';
+  }
 }
 
 function getPlaygroundHtml(playgroundArgs: PlaygroundMountArgs) {

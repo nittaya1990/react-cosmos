@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 type ConsoleMockApi = {
   expectLog: (msg: string) => void;
 };
@@ -5,15 +7,21 @@ type ConsoleMockApi = {
 export async function mockConsole<R>(
   cb: (api: ConsoleMockApi) => Promise<R>
 ): Promise<R> {
-  const origConsoleLog = console.log;
-  console.log = jest.fn();
-
   const expectedLogs: string[] = [];
-  const ret = await cb({
+
+  const origConsoleLog = console.log;
+  console.log = vi.fn((...args: unknown[]) => {
+    if (typeof args[0] !== 'string' || !expectedLogs.includes(args[0])) {
+      origConsoleLog(...args);
+    }
+  });
+
+  const cbReturn = await cb({
     expectLog: (msg: string) => expectedLogs.push(msg),
   });
   expectedLogs.forEach(msg => expect(console.log).toBeCalledWith(msg));
 
   console.log = origConsoleLog;
-  return ret;
+
+  return cbReturn;
 }
